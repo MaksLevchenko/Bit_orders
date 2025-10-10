@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Демо приложение</title>
+</head>
+<body>
+
+    Хорошего настроения {{ request.bitrix_user.first_name }} {{ request.bitrix_user.last_name }}!
+    {% include "top_menu.html" %}
+<br>
+</body>
+</html>
