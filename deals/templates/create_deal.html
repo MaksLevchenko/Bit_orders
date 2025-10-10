@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создание новой сделки</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">Создание новой сделки в Bitrix24</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.opportunity.id_for_label }}" class="form-label">{{ form.opportunity.label }}</label>
+                                    {{ form.opportunity }}
+                                    {% if form.opportunity.errors %}
+                                        <div class="text-danger">{{ form.opportunity.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.currency_id.id_for_label }}" class="form-label">{{ form.currency_id.label }}</label>
+                                    {{ form.currency_id }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.deal_type.id_for_label }}" class="form-label">{{ form.deal_type.label }}</label>
+                                    {{ form.deal_type }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
+                                    {{ form.priority }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contact_email.id_for_label }}" class="form-label">{{ form.contact_email.label }}</label>
+                                    {{ form.contact_email }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contact_phone.id_for_label }}" class="form-label">{{ form.contact_phone.label }}</label>
+                                    {{ form.contact_phone }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.project_deadline.id_for_label }}" class="form-label">{{ form.project_deadline.label }}</label>
+                                    {{ form.project_deadline }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check mt-4">
+                                        {{ form.send_notification }}
+                                        <label for="{{ form.send_notification.id_for_label }}" class="form-check-label">
+                                            {{ form.send_notification.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                                {{ form.description }}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">Создать сделку</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
