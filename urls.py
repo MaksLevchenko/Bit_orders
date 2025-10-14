@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.conf.urls.static import static
+from django.conf import settings
 from django.urls import path, include
 
 from start.views.start import start
@@ -8,4 +10,5 @@ urlpatterns = [
 
     path('', start, name='start'),
     path('deals/', include('deals.urls')),
-]
+    path('products/', include('products.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

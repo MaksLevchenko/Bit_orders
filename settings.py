@@ -16,7 +16,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -48,6 +48,10 @@ INSTALLED_APPS = [
     'integration_utils.bitrix24',
     'integration_utils.its_utils.app_gitpull',
     'start',
+
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -141,6 +145,10 @@ STATICFILES_DIRS = [
 ]
 
 BITRIX24_WEBHOOK_URL = os.getenv('BITRIX24_WEBHOOK_URL')
+BITRIX24_DOMAIN = os.getenv('PORTAL_DOMAIN')
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

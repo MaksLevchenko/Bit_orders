@@ -1,0 +1,102 @@
+
+{% load crispy_forms_tags %}
+
+{% block title %}Генерация QR-кода для товара{% endblock %}
+{% if error %}
+<br>
+<br>
+    Товара с таким ID нет. Введите другой ID.
+{% endif %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-qrcode"></i> Генерация QR-кода для товара</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="product-search-form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i> Найти товар
+                        </button>
+<!--                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Отмена</a>-->
+                    </div>
+                </form>
+                
+                <!-- Результаты поиска по названию -->
+                <div id="search-results" class="mt-4" style="display: none;">
+                    <h5>Результаты поиска:</h5>
+                    <div id="results-list" class="list-group"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('id_product_name');
+    const resultsDiv = document.getElementById('search-results');
+    const resultsList = document.getElementById('results-list');
+    
+    let searchTimeout;
+    
+    nameInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`/products/autocomplete/?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(products => {
+                    resultsList.innerHTML = '';
+                    
+                    if (products.length === 0) {
+                        resultsList.innerHTML = '<div class="list-group-item text-muted">Товары не найдены</div>';
+                    } else {
+                        products.forEach(product => {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.innerHTML = `
+                                <strong>${product.name}</strong>
+                                <br>
+                                <small class="text-muted">ID: ${product.id} • Цена: ${product.price} руб.</small>
+                            `;
+                            item.addEventListener('click', function() {
+                                document.getElementById('id_product_id').value = product.id;
+                                nameInput.value = product.name;
+                                resultsDiv.style.display = 'none';
+                            });
+                            resultsList.appendChild(item);
+                        });
+                    }
+                    
+                    resultsDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }, 500);
+    });
+    
+    // Скрываем результаты при клике вне
+    document.addEventListener('click', function(e) {
+        if (!nameInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+
+{% load crispy_forms_tags %}
+
+{% block title %}Генерация QR-кода{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-info-circle"></i> Информация о товаре</h4>
+            </div>
+            <div class="card-body">
+                <h5>{{ product.name }}</h5>
+                <img src="{{ product.image }}" class="img-fluid rounded"
+                             style="max-height: 200px; max-width: 100%;">
+                <table class="table table-borderless">
+                    <tr>
+                        <th>ID товара:</th>
+                        <td>{{ product.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Цена:</th>
+                        <td>{{ product.price }} руб.</td>
+                    </tr>
+                    {% if product.description %}
+                    <tr>
+                        <th>Описание:</th>
+                        <td>{{ product.description|truncatewords:20 }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-cog"></i> Настройки QR-кода</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'generate_qr_step2' %}">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-qrcode"></i> Сгенерировать QR-код
+                        </button>
+                        <a href="{% url 'generate_qr' %}" class="btn btn-outline-secondary">
+                            Выбрать другой товар
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        {% if qr_image %}
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-check-circle"></i> QR-код сгенерирован!</h4>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ qr_image }}" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                <p class="text-muted">Отсканируйте QR-код для просмотра информации о товаре</p>
+                
+                <div class="mt-3">
+                    <small class="text-muted">Ссылка:</small>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ qr_url }}" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ qr_url }}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ qr_image }}" download="qr_code_{{ product.id }}.png" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Скачать QR-код
+                    </a>
+                    <a href="{% url 'generate_qr' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Создать еще один
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-qrcode fa-4x mb-3"></i>
+                <h5>QR-код будет отображен здесь</h5>
+                <p>Заполните форму и нажмите "Сгенерировать QR-код"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
