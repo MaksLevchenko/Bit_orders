@@ -1,0 +1,96 @@
+<!-- Bitrix24 JS SDK -->
+<script src="https://api.bitrix24.com/api/v1/"></script>
+
+<script>
+// BX24 utility functions
+class BX24Helper {
+    constructor() {
+        this.isInitialized = false;
+        this.init();
+    }
+
+    async init() {
+        if (typeof BX24 !== 'undefined') {
+            try {
+                await this.initializeBX24();
+                this.isInitialized = true;
+                console.log('BX24 SDK успешно инициализирован');
+            } catch (error) {
+                console.warn('Ошибка инициализации BX24:', error);
+                this.isInitialized = false;
+            }
+        } else {
+            console.warn('BX24 SDK не загружен');
+            this.isInitialized = false;
+        }
+    }
+
+    initializeBX24() {
+        return new Promise((resolve, reject) => {
+            BX24.init(function() {
+                console.log('BX24.init callback executed');
+                resolve();
+            });
+        });
+    }
+
+    openUserProfile(userId) {
+        if (this.isInitialized && BX24.openPath) {
+            const path = `/company/personal/user/${userId}/`;
+            BX24.openPath(path, (result) => {
+                if (result) {
+                    console.log('Профиль пользователя открыт в слайдере');
+                } else {
+                    console.warn('Не удалось открыть профиль пользователя');
+                    this.openUserProfileFallback(userId);
+                }
+            });
+        } else {
+            this.openUserProfileFallback(userId);
+        }
+    }
+
+    openUserProfileFallback(userId) {
+        const domain = '{{ domain }}' || window.location.hostname;
+        const url = `https://${domain}/company/personal/user/${userId}/`;
+        window.open(url, '_blank');
+        console.log('Профиль открыт в новом окне (fallback)');
+    }
+
+    // Современный метод с использованием BX24 JS SDK
+    openUserProfileModern(userId) {
+        if (window.BX && window.BX.SidePanel) {
+            // Используем современный SidePanel API
+            window.BX.SidePanel.Instance.open(`/company/personal/user/${userId}/`, {
+                customLeftBoundary: 0,
+                cacheable: false
+            });
+        } else if (this.isInitialized) {
+            // Используем старый метод как fallback
+            this.openUserProfile(userId);
+        } else {
+            this.openUserProfileFallback(userId);
+        }
+    }
+}
+
+// Глобальная инициализация
+document.addEventListener('DOMContentLoaded', function() {
+    window.bx24Helper = new BX24Helper();
+
+    // Добавляем обработчики для строк таблицы
+    document.querySelectorAll('.employee-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if (userId) {
+                // Используем современный метод если доступен
+                if (window.BX && window.BX.SidePanel) {
+                    window.bx24Helper.openUserProfileModern(userId);
+                } else {
+                    window.bx24Helper.openUserProfile(userId);
+                }
+            }
+        });
+    });
+});
+</script>

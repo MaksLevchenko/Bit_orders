@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Иерархия сотрудников - Bitrix24</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .employee-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .employee-row:hover {
+            background-color: rgba(13, 110, 253, 0.05) !important;
+        }
+        .management-chain {
+            font-size: 0.85em;
+            color: #6c757d;
+            line-height: 1.3;
+        }
+        .call-count {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .call-count.high {
+            color: #198754;
+        }
+        .call-count.medium {
+            color: #fd7e14;
+        }
+        .call-count.low {
+            color: #6c757d;
+        }
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Заголовок -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h3 mb-2">
+                            <i class="fas fa-sitemap text-primary"></i>
+                            Иерархия сотрудников
+                        </h1>
+                        <p class="text-muted mb-0">
+                            Отображение структуры компании и статистики звонков за последние 24 часа
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group">
+                            <a href="{% url 'create_call' %}">
+                                <button class="btn btn-outline-primary btn-sm" type="submit">
+                                    <i class="fas"></i> Генерация звонков
+                                </button>
+                            </a>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Обновить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основная таблица -->
+        <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i>
+                    Активные сотрудники ({{ total_employees }})
+                </h5>
+                <span class="badge bg-primary">
+                    <i class="fas fa-clock"></i>
+                    Данные актуальны на {% now "d.m.Y H:i" %}
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="30%">Сотрудник</th>
+                                <th width="25%">Должность / Отдел</th>
+                                <th width="30%">Цепочка руководителей</th>
+                                <th width="15%" class="text-center">
+                                    Исходящие звонки > 1 мин
+                                    <br>
+                                    <small class="fw-normal">(за 24 часа)</small>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr class="employee-row" data-user-id="{{ employee.ID}}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if employee.photo_url %}
+                                            <img src="{{ employee.photo_url }}"
+                                                 alt="{{ employee.name }}"
+                                                 class="employee-avatar rounded-circle me-3"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        {% endif %}
+                                        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center employee-avatar"
+                                             style="display: {% if employee.photo_url %}none{% else %}flex{% endif %};">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="d-block">{{ employee.LAST_NAME }} {{ employee.NAME }}</strong>
+                                            {% if employee.EMAIL %}
+                                            <small class="text-muted">{{ employee.EMAIL }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ employee.WORK_POSITION|default:"Должность не указана" }}</strong>
+                                        {% if employee.DEPARTMENTS %}
+                                            {% for dep in employee.DEPARTMENTS %}
+                                                <br>
+                                                <small class="text-muted">{{ dep }}</small>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="management-chain">
+                                        {% if employee.HEADS %}
+                                            {% for head in employee.HEADS %}
+                                                {{ head }}
+                                                <br>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% with call_count=employee.OUTGOING_CALLS_24H %}
+                                    <span class="call-count
+                                        {% if call_count > 5 %}high
+                                        {% elif call_count > 0 %}medium
+                                        {% else %}low
+                                        {% endif %}">
+                                        {{ call_count }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">звонков</small>
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <h5>Сотрудники не найдены</h5>
+                                    <p>Запустите синхронизацию с Bitrix24</p>
+                                    <code>python manage.py sync_company_data</code>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6><i class="fas fa-chart-bar"></i> Статистика звонков</h6>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <div class="h4 text-primary mb-1">
+                                        {{ employees|length }}
+                                    </div>
+                                    <small class="text-muted">Всего сотрудников</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <div class="h4 text-success mb-1">
+                                        {{ employees_with_calls }}
+                                    </div>
+                                    <small class="text-muted">Совершили звонков</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-info mb-1">
+                                    {{ time_24_hours_ago|date:"d.m.Y H:i" }}
+                                </div>
+                                <small class="text-muted">Период отсчета</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle"></i> Информация</h6>
+                        <ul class="list-unstyled small mb-0">
+                            <li><i class="fas fa-mouse-pointer text-primary"></i> Нажмите на сотрудника для открытия профиля</li>
+                            <li><i class="fas fa-phone text-success"></i> Учитываются только исходящие звонки > 1 минуты</li>
+                            <li><i class="fas fa-clock text-info"></i> Статистика за последние 24 часа</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем Bitrix24 скрипты -->
+    {% include 'include/bx24_scripts.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    function refreshData() {
+        window.location.reload();
+    }
+
+    function showHelp() {
+        alert('ИНСТРУКЦИЯ:\n\n' +
+              '1. Нажмите на любого сотрудника в таблице чтобы открыть его профиль в Bitrix24\n' +
+              '2. Статистика звонков обновляется автоматически каждые 24 часа\n' +
+              '3. Цвет индикатора звонков:\n' +
+              '   🟢 > 5 звонков\n' +
+              '   🟠 1-5 звонков\n' +
+              '   ⚪ 0 звонков\n\n' +
+              'Для обновления данных используйте команды:\n' +
+              'python manage.py sync_company_data\n' +
+              'python manage.py generate_test_calls --days=1');
+    }
+
+    // Дополнительная обработка для мобильных устройств
+    document.addEventListener('DOMContentLoaded', function() {
+        // Добавляем подсказку для мобильных
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('.employee-row').forEach(row => {
+                row.style.cursor = 'pointer';
+                row.title = 'Нажмите для открытия профиля';
+            });
+        }
+    });
+    </script>
+</body>
+</html>

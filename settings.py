@@ -51,7 +51,9 @@ INSTALLED_APPS = [
 
     'crispy_forms',
     'crispy_bootstrap5',
+
     'products',
+    'employees',
 ]
 
 MIDDLEWARE = [
@@ -145,6 +147,7 @@ STATICFILES_DIRS = [
 ]
 
 BITRIX24_WEBHOOK_URL = os.getenv('BITRIX24_WEBHOOK_URL')
+BITRIX24_CALL_WEBHOOK_URL = os.getenv('BITRIX24_CALL_WEBHOOK_URL')
 BITRIX24_DOMAIN = os.getenv('PORTAL_DOMAIN')
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
