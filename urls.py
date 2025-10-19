@@ -12,4 +12,5 @@ urlpatterns = [
     path('deals/', include('deals.urls')),
     path('products/', include('products.urls')),
     path('employees/', include('employees.urls')),
+    path('map/', include('companies_on_maps.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

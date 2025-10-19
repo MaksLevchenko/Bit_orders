@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     'products',
     'employees',
+    'companies_on_maps',
 ]
 
 MIDDLEWARE = [
@@ -149,6 +150,8 @@ STATICFILES_DIRS = [
 BITRIX24_WEBHOOK_URL = os.getenv('BITRIX24_WEBHOOK_URL')
 BITRIX24_CALL_WEBHOOK_URL = os.getenv('BITRIX24_CALL_WEBHOOK_URL')
 BITRIX24_DOMAIN = os.getenv('PORTAL_DOMAIN')
+
+YANDEX_MAPS_API_KEY = os.getenv('YANDEX_MAPS_API_KEY')
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

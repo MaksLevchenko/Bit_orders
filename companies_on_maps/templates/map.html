@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта компаний</title>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_maps_api_key }}&lang=ru_RU" type="text/javascript"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        .company-balloon {
+            padding: 10px;
+        }
+        .company-balloon h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .company-balloon p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .sync-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .sync-button:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script type="text/javascript">
+        const companies = {{ companies_json|safe }};
+
+        ymaps.ready(initMap);
+
+        function initMap() {
+            const map = new ymaps.Map('map', {
+                center: [55.76, 37.64], // Москва по умолчанию
+                zoom: 10
+            });
+
+            // Создаем кластеризатор
+            const clusterer = new ymaps.Clusterer({
+                clusterDisableClickZoom: true,
+                clusterOpenBalloonOnClick: true,
+                clusterBalloonContentLayout: 'cluster#balloonCarousel'
+            });
+
+            // Создаем метки для компаний
+            const placemarks = companies.map(company => {
+                return new ymaps.Placemark(
+                    [company.lat, company.lon],
+                    {
+
+                        balloonContentHeader: company.name,
+                        balloonContentBody: `
+                            <div class="company-balloon">
+                                <h3>${company.name}</h3>
+
+                                <p><strong>Адрес:</strong> ${company.address || 'Не указан'}</p>
+                                ${company.phone ? `<p><strong>Телефон:</strong> ${company.phone}</p>` : ''}
+                                ${company.email ? `<p><strong>Email:</strong> ${company.email}</p>` : ''}
+                            </div>
+                        `,
+                        clusterCaption: company.name
+                    },
+                    {
+                        preset: 'islands#blueBusinessIcon'
+                    }
+                );
+            });
+
+            // Добавляем метки в кластеризатор
+            clusterer.add(placemarks);
+            map.geoObjects.add(clusterer);
+
+            // Автоматически подбираем масштаб для показа всех меток
+            if (placemarks.length > 0) {
+                map.setBounds(clusterer.getBounds(), {
+                    checkZoomRange: true
+                });
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
