@@ -13,4 +13,5 @@ urlpatterns = [
     path('products/', include('products.urls')),
     path('employees/', include('employees.urls')),
     path('map/', include('companies_on_maps.urls')),
+    path('contact/', include('contact_import.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

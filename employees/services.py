@@ -51,6 +51,7 @@ class Bitrix24CompanyService:
             departments = self.bx.get_all('department.get', {
                 'select': ['ID', 'NAME', 'PARENT', 'UF_HEAD']
             })
+
             logger.info(f"Получено {len(departments)} отделов")
             return departments
         except Exception as e:
@@ -118,7 +119,6 @@ class Bitrix24CompanyService:
                         if user['ID'] == manager_id:
                             managers_info.append(f"{user['LAST_NAME']} {user['NAME']}")
                             break
-
         return user_departments, managers_info
 
     def get_call_statistics(self, from_date: datetime, to_date: datetime) -> List[Dict]:

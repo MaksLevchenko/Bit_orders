@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'products',
     'employees',
     'companies_on_maps',
+    'contact_import',
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,7 @@ STATICFILES_DIRS = [
 BITRIX24_WEBHOOK_URL = os.getenv('BITRIX24_WEBHOOK_URL')
 BITRIX24_CALL_WEBHOOK_URL = os.getenv('BITRIX24_CALL_WEBHOOK_URL')
 BITRIX24_DOMAIN = os.getenv('PORTAL_DOMAIN')
+BITRIX_BATCH_SIZE = 50
 
 YANDEX_MAPS_API_KEY = os.getenv('YANDEX_MAPS_API_KEY')
 
