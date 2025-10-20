@@ -37,10 +37,22 @@ class BitrixClient:
             result = self.bitrix.call('crm.company.get', {
                 'id': company_id
             })
-            tel = result.get('order0000000000').get('PHONE')[0].get('VALUE')
-            email = result.get('order0000000000').get('EMAIL')[0].get('VALUE')
-            logo = result.get('order0000000000').get('LOGO').get('showUrl')
-            return tel, email, logo
+            if result.get('order0000000000'):
+                if result.get('order0000000000').get('PHONE'):
+                    tel = result.get('order0000000000').get('PHONE')[0].get('VALUE', '')
+                else:
+                    tel = ''
+                if result.get('order0000000000').get('EMAIL'):
+                    email = result.get('order0000000000').get('EMAIL')[0].get('VALUE', '')
+                else:
+                    email = ''
+                if result.get('order0000000000').get('LOGO'):
+                    logo = result.get('order0000000000').get('LOGO').get('showUrl', '')
+                else:
+                    logo = ''
+                return tel, email, logo
+            else:
+                return None
         except Exception as e:
             print(f"Ошибка при получении контактов и логотипа компании {company_id}: {e}")
             return None
